@@ -2,12 +2,26 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from typing import Any, Generic, Protocol, TypeVar, runtime_checkable
+
+T = TypeVar("T", covariant=True)
+
+
+@runtime_checkable
+class TotallyOrdered(Protocol[T]):
+    def __lt__(self, other: T) -> bool: ...
+    def __le__(self, other: T) -> bool: ...
+    def __gt__(self, other: T) -> bool: ...
+    def __ge__(self, other: T) -> bool: ...
+
+
+IntervalBoundaryT = TypeVar("IntervalBoundaryT", bound=TotallyOrdered[Any])
 
 
 @dataclass(frozen=True, order=True)
-class Interval:
-    start: datetime
-    end: datetime
+class Interval(Generic[IntervalBoundaryT]):
+    start: TotallyOrdered
+    end: TotallyOrdered
     value: float = field(default=0)
 
     def __post_init__(self) -> None:
