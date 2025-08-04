@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Collection, Iterable, Sequence
+from datetime import datetime, timedelta
+from typing import Collection, Iterable, Sequence, Generic
 
 from sortedcontainers import SortedList
 
 from .constants import TIME_ZERO
-from .interval import Interval
+from .interval import Interval, IntervalBoundaryT
 from .search import weak_predecessor
 from .time_value_node import TimeValueNode, _simplify
 
@@ -27,7 +27,7 @@ def _to_new_node(
 
 
 def _active_node_at_time(
-    nodes: SortedList[TimeValueNode], when: datetime
+    nodes: SortedList[TimeValueNode], when: IntervalBoundaryT
 ) -> TimeValueNode:
     if node := weak_predecessor(nodes, TimeValueNode(when)):
         return node
@@ -48,7 +48,7 @@ def _make_range(
 
 def _relevant_nodes(
     nodes: SortedList[TimeValueNode],
-    interval: Interval,
+    interval: Interval[datetime, timedelta],
 ) -> list[TimeValueNode]:
     return list(
         nodes.irange(
@@ -60,11 +60,11 @@ def _relevant_nodes(
 
 
 @dataclass
-class IntervalHandler:
-    __intervals: list[Interval]
+class IntervalHandler(Generic[IntervalBoundaryT]):
+    __intervals: list[Interval[IntervalBoundaryT]]
     __projection_graph: SortedList[TimeValueNode]
 
-    def __init__(self, intervals: Iterable[Interval] = []):
+    def __init__(self, intervals: Iterable[Interval[IntervalBoundaryT]] = []) -> IntervalHandler[IntervalBoundaryT]:
         self._initialize()
         self.add(intervals)
 
@@ -99,8 +99,8 @@ class IntervalHandler:
     def projection_graph(self) -> Sequence[TimeValueNode]:
         return list(self.__projection_graph)
 
-    def node_at_time(self, when: datetime) -> TimeValueNode:
+    def node_at_time(self, when: IntervalBoundaryT) -> TimeValueNode:
         return _active_node_at_time(self.__projection_graph, when)
 
-    def value_at_time(self, when: datetime) -> float:
+    def value_at_time(self, when: IntervalBoundaryT) -> float:
         return _active_node_at_time(self.__projection_graph, when).value

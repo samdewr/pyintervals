@@ -285,7 +285,7 @@ _degenerate_interval_with_value = partial(
     ],
 )
 def test_time_value_node_value(
-    intervals: Sequence[Interval],
+    intervals: Sequence[Interval[datetime]],
     expected_value: float,
 ) -> None:
     assert _to_tvn(intervals).value == expected_value

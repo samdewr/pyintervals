@@ -4,24 +4,26 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Generic, Protocol, TypeVar, runtime_checkable
 
-T = TypeVar("T", covariant=True)
+BoundaryT = TypeVar("BoundaryT", contravariant=True)
+DurationT = TypeVar("DurationT", covariant=True)
 
 
 @runtime_checkable
-class TotallyOrdered(Protocol[T]):
-    def __lt__(self, other: T) -> bool: ...
-    def __le__(self, other: T) -> bool: ...
-    def __gt__(self, other: T) -> bool: ...
-    def __ge__(self, other: T) -> bool: ...
+class TotallyOrdered(Protocol[BoundaryT, DurationT]):
+    def __lt__(self, other: BoundaryT) -> bool: ...
+    def __le__(self, other: BoundaryT) -> bool: ...
+    def __gt__(self, other: BoundaryT) -> bool: ...
+    def __ge__(self, other: BoundaryT) -> bool: ...
+    def __sub__(self, other: BoundaryT) -> DurationT: ...
 
 
-IntervalBoundaryT = TypeVar("IntervalBoundaryT", bound=TotallyOrdered[Any])
+IntervalBoundaryT = TypeVar("IntervalBoundaryT", bound=TotallyOrdered[Any, Any])
 
 
 @dataclass(frozen=True, order=True)
-class Interval(Generic[IntervalBoundaryT]):
-    start: TotallyOrdered
-    end: TotallyOrdered
+class Interval(Generic[IntervalBoundaryT, DurationT]):
+    start: IntervalBoundaryT
+    end: IntervalBoundaryT
     value: float = field(default=0)
 
     def __post_init__(self) -> None:
@@ -33,13 +35,13 @@ class Interval(Generic[IntervalBoundaryT]):
     def is_degenerate(self) -> bool:
         return self.start == self.end
 
-    def duration(self) -> timedelta:
+    def duration(self) -> DurationT:
         return self.end - self.start
 
-    def overlaps_with(self, other: Interval) -> bool:
+    def overlaps_with(self, other: Interval[IntervalBoundaryT]) -> bool:
         return overlaps(self, other)
 
-    def contains(self, other: Interval) -> bool:
+    def contains(self, other: Interval[IntervalBoundaryT]) -> bool:
         return contains(self, other)
 
 

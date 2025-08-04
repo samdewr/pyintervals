@@ -3,18 +3,18 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from itertools import filterfalse
-from typing import Sequence
+from typing import Sequence, Generic
 
 from sortedcontainers import SortedList
 
 from pyintervals import Interval
 from pyintervals.constants import TIME_ZERO
-from pyintervals.interval import contains_point
+from pyintervals.interval import contains_point, IntervalBoundaryT
 
 
 @dataclass(frozen=True)
-class TimeValueNode:
-    time_point: datetime
+class TimeValueNode(Generic[IntervalBoundaryT]):  # TODO: Change the name of this class to e.g. PointValueNode?
+    time_point: IntervalBoundaryT  # TODO: Change the name of this attribute to e.g. `point`
     __intervals: SortedList[Interval] = field(default_factory=SortedList)
     __starting_intervals: SortedList[Interval] = field(
         default_factory=SortedList

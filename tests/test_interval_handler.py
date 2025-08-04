@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Iterable, Sequence
 
 import pytest
@@ -180,7 +180,7 @@ from pyintervals.time_value_node import TimeValueNode
     ],
 )
 def test_interval_handler_with_intervals(
-    intervals: Iterable[Interval],
+    intervals: Iterable[Interval[datetime, timedelta]],
     n_expected_intervals: int,
     n_expected_tvn: int,
     expected_tvn_time_points: list[datetime],
@@ -198,7 +198,7 @@ def test_interval_handler_with_intervals(
 
 
 @pytest.fixture
-def interval_handler_w_2_intervals() -> IntervalHandler:
+def interval_handler_w_2_intervals() -> IntervalHandler[datetime]:
     return IntervalHandler(
         intervals=[
             Interval(datetime(2023, 10, 6), datetime(2024, 2, 29)),
@@ -230,7 +230,7 @@ def interval_handler_w_2_intervals() -> IntervalHandler:
 def test_add_intervals(
     request: FixtureRequest,
     interval_handler: str,
-    new_intervals: Sequence[Interval],
+    new_intervals: Sequence[Interval[datetime, timedelta]],
 ) -> None:
     handler = request.getfixturevalue(interval_handler)
     prev_count = len(handler.intervals)
@@ -244,7 +244,7 @@ def test_add_intervals(
 
 
 def test_remove_intervals(
-    interval_handler_w_2_intervals: IntervalHandler,
+    interval_handler_w_2_intervals: IntervalHandler[datetime],
 ) -> None:
     handler = interval_handler_w_2_intervals
     original_count = len(handler.intervals)
@@ -322,7 +322,7 @@ def test_remove_intervals(
     ],
 )
 def test_make_range(
-    nodes: SortedList[TimeValueNode], new_interval: Interval
+    nodes: SortedList[TimeValueNode], new_interval: Interval[datetime, timedelta]
 ) -> None:
     _make_range(nodes, new_interval)
     assert {new_interval.start, new_interval.end}.issubset(
@@ -330,7 +330,7 @@ def test_make_range(
     )
 
 
-def _complex_intervals() -> list[Interval]:
+def _complex_intervals() -> list[Interval[datetime, timedelta]]:
     return [
         Interval(
             start=datetime(2023, 1, 1),
@@ -375,7 +375,7 @@ def _complex_intervals() -> list[Interval]:
     ]
 
 
-def _complex_interval_handler() -> IntervalHandler:
+def _complex_interval_handler() -> IntervalHandler[datetime]:
     return IntervalHandler(intervals=_complex_intervals())
 
 
@@ -430,7 +430,7 @@ def test_node_and_value_at_time(
     ],
 )
 def test_remove_intervals_detailed(
-    intervals: list[Interval], n_expected_tvn_reduction: int
+    intervals: list[Interval[datetime, timedelta]], n_expected_tvn_reduction: int
 ) -> None:
     handler = _complex_interval_handler()
     original_tvn_count = len(handler.projection_graph())

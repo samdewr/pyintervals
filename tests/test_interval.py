@@ -10,7 +10,7 @@ from tests.helpers import FUTURE_DATE, NOT_SO_IMPORTANT_LATER_DATE, THE_DATE
 
 
 @pytest.fixture
-def regular_interval() -> Interval:
+def regular_interval() -> Interval[datetime, timedelta]:
     return Interval(
         start=THE_DATE,
         end=FUTURE_DATE,
@@ -19,7 +19,7 @@ def regular_interval() -> Interval:
 
 
 @pytest.fixture
-def degenerate_interval() -> Interval:
+def degenerate_interval() -> Interval[datetime, timedelta]:
     return Interval(
         start=THE_DATE,
         end=THE_DATE,
@@ -34,18 +34,18 @@ def test_invalid_interval():
         )
 
 
-def test_valid_interval(regular_interval):
+def test_valid_interval(regular_interval: Interval[datetime, timedelta]) -> None:
     assert regular_interval
     assert regular_interval.value == 1
 
 
-def test_degenerate_interval(degenerate_interval, regular_interval):
+def test_degenerate_interval(degenerate_interval: Interval[datetime, timedelta], regular_interval: Interval[datetime, timedelta]) -> None:
     assert degenerate_interval.is_degenerate()
     assert not regular_interval.is_degenerate()
 
 
 @pytest.fixture
-def interval_of_1_day() -> Interval:
+def interval_of_1_day() -> Interval[datetime, timedelta]:
     start = THE_DATE
     return Interval(
         start=start,
@@ -54,7 +54,7 @@ def interval_of_1_day() -> Interval:
 
 
 @pytest.fixture
-def interval_of_1_hour() -> Interval:
+def interval_of_1_hour() -> Interval[datetime, timedelta]:
     start = THE_DATE
     return Interval(
         start=start,
